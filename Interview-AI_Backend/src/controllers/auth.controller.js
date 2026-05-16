@@ -47,8 +47,12 @@ async function registerUser(req, res) {
       { expiresIn: "1d" },
     );
 
-    res.cookie("token", token);
-
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
     return res.status(200).json({
       message: "User registered successfully",
       user: {
@@ -100,7 +104,12 @@ async function loginUser(req, res) {
       { expiresIn: "1d" },
     );
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
     return res.status(200).json({
       message: "User Logged in successfully",
@@ -131,7 +140,11 @@ async function logoutUser(req, res) {
     if (token) {
       await blacklistTokenModel.create({ token });
 
-      res.clearCookie("token");
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
       return res.status(200).json({
         message: "User logged out successfully",
       });
@@ -174,5 +187,5 @@ module.exports = {
   registerUser,
   loginUser,
   logoutUser,
-  getMe
+  getMe,
 };
