@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-// import './App.css'
+import Landing from "./features/interview/pages/Landing"; // Make sure to create this file
 import Login from "./features/authentication/pages/Login";
 import Register from "./features/authentication/pages/Register";
 import { AuthProvider } from "./features/authentication/services/auth.context";
@@ -9,23 +9,40 @@ import Protected from "./features/authentication/components/Protected";
 import Interview from "./features/interview/pages/Interview";
 
 function App() {
-
   return (
-    <>
-      <BrowserRouter>
-        <AuthProvider>
-          <InterviewProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={<Protected><Home /></Protected>} />
-              <Route path="/interview/:interviewId" element={<Protected><Interview /></Protected>} />
-            </Routes>
-          </InterviewProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <InterviewProvider>
+          <Routes>
+            {/* 1. Public Landing Page */}
+            <Route path="/" element={<Landing />} />
+
+            {/* 2. Authentication Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* 3. Protected Dashboard Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <Protected>
+                  <Home />
+                </Protected>
+              } 
+            />
+            <Route 
+              path="/interview/:interviewId" 
+              element={
+                <Protected>
+                  <Interview />
+                </Protected>
+              } 
+            />
+          </Routes>
+        </InterviewProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
