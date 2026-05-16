@@ -188,7 +188,7 @@ export default function Interview() {
             <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
 
                 {/* ── LEFT UTILITY PANEL (Flips layout fluidly on mobile viewports) ── */}
-                <nav className="w-full lg:w-56 shrink-0 bg-[#161925] border-b lg:border-b-0 lg:border-r border-gray-800 flex flex-row lg:flex-col justify-between lg:justify-start gap-2 p-3 sm:p-4">
+                <nav className="w-full lg:w-56 shrink-0 bg-[#161925] border-b lg:border-b-0 lg:border-r border-gray-800 flex flex-col lg:flex-col lg:justify-start gap-2 p-3 sm:p-4">
                     <div className="flex flex-row lg:flex-col gap-1.5 flex-1 mr-2 lg:mr-0">
                         {TABS.map((tab) => (
                             <button

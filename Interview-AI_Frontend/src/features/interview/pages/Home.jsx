@@ -21,21 +21,7 @@ const Home = () => {
   return (
     <main className="min-h-screen w-full bg-[#0f111a] text-gray-200 p-4 sm:p-6 md:p-8">
         <Navbar />
-      <div className="mx-auto w-full max-w-5xl">
-        
-        {/* Top Navbar Row */}
-        <header className="flex w-full items-center justify-between border-b border-gray-800 pb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm">
-              iA
-            </div>
-            <span className="text-base font-semibold text-white">InterviewAI</span>
-          </div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-gray-900 border border-gray-800 px-3 py-1 text-xs text-gray-400">
-            <span className="h-2 w-2 rounded-full bg-indigo-500" />
-            Ready for setup
-          </span>
-        </header>
+      <div className="mx-auto w-full max-w-5xl">       
 
         {/* Introduction Header */}
         <div className="mt-10 max-w-2xl">
@@ -89,7 +75,7 @@ const Home = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-gray-300">
-                      {resumeName || 'Click to select files from your computer'}
+                      {resumeName || 'Click to select files from your device'}
                     </div>
                     <div className="text-xs text-gray-500">Supported format: PDF up to 5 MB</div>
                   </div>
@@ -163,12 +149,12 @@ const Home = () => {
               <h2 className="text-lg font-bold text-white">Your Saved Dashboard Reports</h2>
               <p className="text-xs text-gray-400">Revisit files you built previously.</p>
             </div>
-            {reports && reports.length > 0 && (
+            {reports.length > 0 && (
               <span className="text-xs text-gray-500 tracking-wider font-medium">{reports.length} saved reports</span>
             )}
           </div>
 
-          {reports && reports.length > 0 ? (
+          {reports.length > 0 ? (
             <div className="flex flex-col gap-2.5">
               {reports.map((report) => (
                 <div

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -10,10 +11,17 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!email || !password) {
+      toast.error('Please enter both email and password')
+      return
+    }
     const success = await handleLogin({ email, password })
     if (success) {
       navigate('/dashboard')
-    } 
+      toast.success('Login successful!')
+    } else {
+      toast.error('Invalid email or password')
+    }
   }
 
   if (loading) {
