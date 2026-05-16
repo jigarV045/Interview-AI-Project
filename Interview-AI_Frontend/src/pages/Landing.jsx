@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Navbar } from "../../components/UI";
+import { Navbar } from "../components/UI";
 
 const features = [
   {
