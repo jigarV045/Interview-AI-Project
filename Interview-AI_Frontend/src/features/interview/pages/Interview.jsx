@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useInterview } from "../hooks/useInterview";
 import { Link, useParams } from "react-router";
-import Navbar from "../../authentication/components/Navbar";
+import Navbar from "../../../components/Navbar";
 import toast from "react-hot-toast";
 
 const TABS = [

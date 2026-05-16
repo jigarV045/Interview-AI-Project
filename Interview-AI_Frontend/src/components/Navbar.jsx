@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../features/authentication/hooks/useAuth'
 
 const Navbar = () => {
   const { handleLogout } = useAuth() 

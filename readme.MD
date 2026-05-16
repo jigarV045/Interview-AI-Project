@@ -50,8 +50,8 @@ All previously generated reports are listed on the Home page so you can revisit 
 | Frontend | React.js |
 | Backend | Node.js + Express |
 | Authentication | JWT / Session-based Auth |
-| AI Integration | LLM API (e.g., OpenAI / Anthropic) |
-| Database | MongoDB / PostgreSQL |
+| AI Integration | LLM API (e.g., Gemini AI) |
+| Database | MongoDB |
 | Styling | CSS / Tailwind CSS |
 
 ---
@@ -59,16 +59,52 @@ All previously generated reports are listed on the Home page so you can revisit 
 ## 📁 Project Structure
 
 ```
-├── client/                 # React frontend
+├── Interview_AI_Backend/   # Node.js backend
 │   ├── src/
-│   │   ├── pages/          # Home, Login, Register, Report
-│   │   ├── components/     # Reusable UI components
-│   │   └── services/       # API calls
-├── server/                 # Node.js backend
-│   ├── routes/             # Auth, report generation
-│   ├── controllers/        # Business logic
-│   ├── models/             # Database schemas
-│   └── middleware/         # Auth middleware
+│   │   ├── config/            # Database and infrastructure configurations
+│   │   │   └── db.js          # MongoDB connection handler
+│   │   ├── controllers/       # HTTP Request handlers & Business logic orchestration
+│   │   │   ├── auth.controller.js
+│   │   │   └── interview.controller.js
+│   │   ├── middlewares/       # Request interceptors & Validation guards
+│   │   │   ├── auth.middleware.js
+│   │   │   └── file.middleware.js   # Handles incoming multipart file streams (Multer)
+│   │   ├── models/            # Mongoose Data Schemas (ODM)
+│   │   │   ├── blacklistToken.model.js  # Tracks invalidated JWT session tokens
+│   │   │   ├── interviewReport.model.js # Schema for compiled AI analysis records
+│   │   │   └── user.model.js            # User profiles & credential records
+│   │   ├── routes/            # Express Router endpoints mappings
+│   │   │   ├── auth.routes.js
+│   │   │   └── interview.routes.js
+│   │   ├── services/          # Third-party integrations & isolated utilities
+│   │   │   └── ai.service.js  # Dedicated Gemini API SDK integration logic
+│   │   └── app.js             # Express server instantiator and middleware assembly
+├── Interview_AI_Frontend/  # React frontend
+src/
+├── components/                # Shared layout UI elements
+│   └── Navbar.jsx             # Shared app header panel
+├── features/
+│   ├── authentication/
+│   │   ├── components/        # Protected session route guards
+│   │   │   └── Protected.jsx
+│   │   ├── pages/             # Auth interface entry paths
+│   │   │   ├── Login.jsx
+│   │   │   └── Register.jsx
+│   │   └── services/          # Session API controllers & context providers
+│   │       ├── auth.api.js
+│   │       └── auth.context.jsx
+│   └── interview/
+│       ├── pages/             # Project execution spaces
+│       │   ├── Landing.jsx    # Public marketing presentation view
+│       │   ├── Home.jsx       # Interactive entry form & user history timeline
+│       │   └── Interview.jsx  # Multi-tab analysis workspace view
+│       └── services/          # Report processing logic & storage hooks
+│           ├── interview.api.js
+│           └── interview.context.jsx
+├── hooks/                     # Custom hooks exposed to view layers
+│   ├── useAuth.js
+│   └── useInterview.js
+└── App.jsx                    # Root application router map
 └── README.md
 ```
 
@@ -85,8 +121,8 @@ All previously generated reports are listed on the Home page so you can revisit 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/jigarV045/Interview-AI-Project.git
+cd Interview-AI-Project
 
 # Install server dependencies
 cd server
@@ -99,25 +135,29 @@ npm install
 
 ### Environment Variables
 
-Create a `.env` file in the `server/` directory:
+Create a `.env` file in the `Interview-AI_Backend/` directory:
 
 ```env
-PORT=5000
+PORT=3000
 DATABASE_URL=your_database_url
 JWT_SECRET=your_jwt_secret
 AI_API_KEY=your_ai_api_key
+```
+Create a `.env` file in the `Interview-AI_Frontend/` directory:
+```env
+VITE_API_URL=http://localhost:3000
 ```
 
 ### Run the App
 
 ```bash
 # Start the backend
-cd server
+cd Interview-AI_Backend
 npm run dev
 
 # Start the frontend (in a new terminal)
-cd client
-npm start
+cd Interview-AI_Frontend
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
