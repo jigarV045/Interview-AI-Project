@@ -9,9 +9,12 @@ export const useAuth = () => {
   const handleRegister = async ({ username, email, password }) => {
     setLoading(true);
     try {
-      const data = await register({username, email, password});
+      const data = await register({ username, email, password });
       setUser(data.user);
+      return true;
     } catch (error) {
+      console.error("Registration failed", error);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -22,7 +25,10 @@ export const useAuth = () => {
     try {
       const data = await login({ email, password });
       setUser(data.user);
+      return true;
     } catch (error) {
+      console.error("Login failed", error);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -31,9 +37,12 @@ export const useAuth = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      const data = await logout();
+      await logout();
       setUser(null);
+      return true;
     } catch (error) {
+      console.error("Logout failed", error);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -41,27 +50,17 @@ export const useAuth = () => {
 
   useEffect(() => {
     const getAndSetData = async () => {
-      // Keep loading = true while we check session
       try {
         const data = await getMe();
         setUser(data.user);
       } catch (error) {
-        // Token invalid/expired — treat as logged out
         setUser(null);
       } finally {
-        // Only NOW is it safe to let route guards run
         setLoading(false);
       }
     };
-
     getAndSetData();
   }, []);
 
-  return {
-    user,
-    loading,
-    handleRegister,
-    handleLogin,
-    handleLogout,
-  };
+  return { user, loading, handleRegister, handleLogin, handleLogout };
 };
