@@ -21,7 +21,7 @@ const SEVERITY_CONFIG = {
     high: { badge: "text-red-400 bg-red-950/40 border border-red-800", barColor: "bg-red-500", barWidth: "w-5/6" },
 };
 
-// ─── CIRCULAR FEEDBACK RING ──────────────────────────────────────────────────
+// ─── CIRCULAR MATCHSCORE RING ──────────────────────────────────────────────────
 function ScoreRing({ score }) {
     const r = 50;
     const circumference = 2 * Math.PI * r;
@@ -84,7 +84,7 @@ function SkillGapItem({ skill, sub, severity }) {
     );
 }
 
-// ─── ACCORDION SELECTION item ────────────────────────────────────────────────
+// ─── QUESTION SELECTION CARD ──────────────────────────────────────────────────
 function QuestionCard({ index, question, intention, answer, prefix, openBorderClass }) {
     const [open, setOpen] = useState(false);
 
@@ -122,7 +122,7 @@ function QuestionCard({ index, question, intention, answer, prefix, openBorderCl
     );
 }
 
-// ─── TIMELINE NODE (ROADMAP) ──────────────────────────────────────────────────
+// ─── TIMELINE CARD (ROADMAP) ──────────────────────────────────────────────────
 function DayCard({ day, focus, tasks }) {
     return (
         <div className="relative pl-6 mb-4 last:mb-0">
@@ -147,7 +147,7 @@ function DayCard({ day, focus, tasks }) {
     );
 }
 
-// ─── MAIN SYSTEM PAGE VIEW ────────────────────────────────────────────────────
+// ─── MAIN REPORT PAGE ────────────────────────────────────────────────────
 export default function Interview() {
     const [activeTab, setActiveTab] = useState("technical");
     const { loading, report, getReportById, generateResume } = useInterview();

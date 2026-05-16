@@ -5,7 +5,6 @@ import { Navigate } from 'react-router';
 const Protected = ({ children }) => {
   const { loading, user } = useAuth();
 
-  // Keep this active so user sessions don't break on page refresh!
   if (loading) {
     return (
       <main className="min-h-screen w-full flex flex-col items-center justify-center bg-[#0f111a] text-white">
@@ -18,12 +17,10 @@ const Protected = ({ children }) => {
     )
   }
 
-  // If loading is done and there's still no user, send them to login
   if (!user) {
     return <Navigate to="/login" />
   }
 
-  // If loading is done and user exists, render the protected page safely
   return children
 }
 

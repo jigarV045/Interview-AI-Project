@@ -5,9 +5,8 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Default true for boot phase
+    const [loading, setLoading] = useState(true);  
 
-    // Run the session verification exactly once here on app launch
     useEffect(() => {
         const verifySession = async () => {
             try {

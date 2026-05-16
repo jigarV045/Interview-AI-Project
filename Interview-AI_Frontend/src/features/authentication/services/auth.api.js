@@ -11,7 +11,7 @@ export async function register({ username, email, password }) {
         return res.data;
     } catch (error) {
         console.error("Failed to register");
-        throw error; // Throwing error lets the calling hook know it failed
+        throw error;
     }
 }
 

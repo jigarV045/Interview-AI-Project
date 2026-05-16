@@ -101,14 +101,6 @@ async function interviewReport({ jobDescription, resume, selfDescription }) {
     Self Description: ${selfDescription}
 `;
 
-  // const response = await ai.models.generateContent({
-  //     model: "gemini-3-flash-preview",
-  //     contents: prompt,
-  //     config: {
-  //         responseMimeType: "application/json",
-  //         responseSchema: zodToJsonSchema(interviewReportSchema),
-  //     }
-  // })
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,

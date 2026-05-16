@@ -80,12 +80,10 @@ const interviewReportSchema = new mongoose.Schema({
 
     resume: {
         type: String,
-        // required: true,
     },
 
     selfDescription: {
         type: String,
-        // required: true,
     },
 
     matchScore: {
@@ -101,7 +99,6 @@ const interviewReportSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "users",
-        // required: true,
     },
     title: {
         type: String,

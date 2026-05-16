@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-import Landing from "./features/interview/pages/Landing"; // Make sure to create this file
+import Landing from "../src/features/authentication/pages/Landing";
 import Login from "./features/authentication/pages/Login";
 import Register from "./features/authentication/pages/Register";
 import { AuthProvider } from "./features/authentication/services/auth.context";
