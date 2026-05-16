@@ -1,15 +1,19 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useInterview } from '../hooks/useInterview'
 import { useNavigate } from 'react-router'
 import Navbar from '../../authentication/components/Navbar'
 
 const Home = () => {
-  const { loading, generateReport, reports } = useInterview()
+  const { loading, generateReport, reports, getAllReports } = useInterview()
   const [jobDescription, setJobDescription] = useState('')
   const [selfDescription, setSelfDescription] = useState('')
   const resumeInputRef = useRef()
   const [resumeName, setResumeName] = useState('')
   const navigate = useNavigate()
+
+  useEffect(() => {
+      getAllReports()
+  }, [])
 
   const handleGenerateReport = async () => {
     const resumeFile = resumeInputRef.current.files[0]

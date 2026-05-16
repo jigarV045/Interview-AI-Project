@@ -7,12 +7,41 @@ import { InterviewProvider } from "./features/interview/services/interview.conte
 import Home from "./features/interview/pages/Home";
 import Protected from "./features/authentication/components/Protected";
 import Interview from "./features/interview/pages/Interview";
+import { Toaster } from "react-hot-toast"
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <InterviewProvider>
+          <Toaster
+            position="top-right"
+            reverseOrder={false}
+            toastOptions={{
+              style: {
+                width: "300px",
+                background: "#161925",         
+                color: "#f3f4f6",              
+                border: "1px solid #1f2937",   
+                borderRadius: "12px",
+                padding: "12px 16px",
+                fontWeight: "600",
+                fontSize: "14px",
+              },
+              success: {
+                iconTheme: {
+                  primary: "#6366f1",          
+                  secondary: "#161925",        
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: "#ef4444",          
+                  secondary: "#161925",        
+                },
+              },
+            }}
+          />
           <Routes>
             {/* 1. Public Landing Page */}
             <Route path="/" element={<Landing />} />
@@ -22,21 +51,21 @@ function App() {
             <Route path="/register" element={<Register />} />
 
             {/* 3. Protected Dashboard Routes */}
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <Protected>
                   <Home />
                 </Protected>
-              } 
+              }
             />
-            <Route 
-              path="/interview/:interviewId" 
+            <Route
+              path="/interview/:interviewId"
               element={
                 <Protected>
                   <Interview />
                 </Protected>
-              } 
+              }
             />
           </Routes>
         </InterviewProvider>

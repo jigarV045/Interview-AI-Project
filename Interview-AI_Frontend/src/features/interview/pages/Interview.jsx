@@ -103,7 +103,7 @@ function QuestionCard({ index, question, intention, answer, prefix, openBorderCl
                 </span>
             </button>
 
-            <div 
+            <div
                 className="transition-all duration-200 ease-in-out overflow-hidden"
                 style={{ maxHeight: open ? "500px" : "0px" }}
             >
@@ -184,18 +184,17 @@ export default function Interview() {
                 </div>
             </header>
 
-            {/* ── WORKSPACE WRAPPER ── */}
             <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
 
                 {/* ── LEFT UTILITY PANEL (Flips layout fluidly on mobile viewports) ── */}
-                <nav className="w-full lg:w-56 shrink-0 bg-[#161925] border-b lg:border-b-0 lg:border-r border-gray-800 flex flex-col lg:flex-col lg:justify-start gap-2 p-3 sm:p-4">
-                    <div className="flex flex-row lg:flex-col gap-1.5 flex-1 mr-2 lg:mr-0">
+                <nav className="w-full lg:w-56 shrink-0 bg-[#161925] border-b lg:border-b-0 lg:border-r border-gray-800 flex p-3 sm:p-4">
+                    <div className="flex flex-row lg:flex-col gap-1.5 w-full">
                         {TABS.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center justify-center lg:justify-start gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors w-full
-                                    ${activeTab === tab.id
+          ${activeTab === tab.id
                                         ? TAB_ACTIVE_STYLES[tab.id]
                                         : "text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent"
                                     }`}
@@ -204,13 +203,15 @@ export default function Interview() {
                                 <span className="hidden sm:inline">{tab.label}</span>
                             </button>
                         ))}
+
+                        <button
+                            onClick={() => generateResume(interviewId)}
+                            className="flex items-center justify-center lg:justify-start gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-transparent bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all w-full"
+                        >
+                            <span>📄</span>
+                            <span className="hidden sm:inline">{loading ? "Building..." : "Export Resume"}</span>
+                        </button>
                     </div>
-                    <button
-                        onClick={() => generateResume(interviewId)}
-                        className="flex items-center justify-center bg-indigo-600 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold text-white hover:bg-indigo-500 transition shrink-0"
-                    >
-                        {loading ? "Building file..." : "Export Resume"}
-                    </button>
                 </nav>
 
                 {/* ── CORE QUESTION RUNTIME DISPLAY ── */}
@@ -242,8 +243,8 @@ export default function Interview() {
                                     openBorderClass="border-indigo-800"
                                 />
                             ))}
-                            </div>
-                        )}
+                        </div>
+                    )}
 
                     {activeTab === "roadmap" && (
                         <div>
