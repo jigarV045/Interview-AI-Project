@@ -1,317 +1,359 @@
 import { useState, useEffect } from "react";
 import { useInterview } from "../hooks/useInterview";
 import { Link, useParams } from "react-router";
-import { Spinner } from "../../../components/UI";
 
+// ─── MOCK DATA ────────────────────────────────────────────────────────────────
+// Replace with your API call when integrating the backend.
+// Shape matches your MongoDB document exactly.
+
+// ─── TAB CONFIG ───────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "technical", label: "Technical Questions", icon: "⚙️" },
-  { id: "behavioral", label: "Behavioral Questions", icon: "🧠" },
-  { id: "roadmap", label: "Prep Roadmap", icon: "🗺️" },
+    { id: "technical", label: "Technical", icon: "⚙️" },
+    { id: "behavioral", label: "Behavioral", icon: "🧠" },
+    { id: "roadmap", label: "Roadmap", icon: "🗺️" },
 ];
 
-const SEVERITY = {
-  low:    { label: "Low",    bg: "#f0fdf4", text: "#0e9f6e", border: "#bbf7d0", bar: "#0e9f6e", width: "30%" },
-  medium: { label: "Medium", bg: "#fffbeb", text: "#c2570a", border: "#fde68a", bar: "#e3a008", width: "60%" },
-  high:   { label: "High",   bg: "#fef2f2", text: "#e02424", border: "#fecaca", bar: "#e02424", width: "90%" },
+const TAB_ACTIVE_STYLES = {
+    technical: "text-emerald-400 bg-emerald-950 border border-emerald-700",
+    behavioral: "text-sky-400 bg-sky-950 border border-sky-700",
+    roadmap: "text-pink-400 bg-pink-950 border border-pink-700",
 };
 
+const SEVERITY_CONFIG = {
+    low: { badge: "text-emerald-400 bg-emerald-950 border border-emerald-800", barColor: "bg-emerald-400", barWidth: "w-1/3" },
+    medium: { badge: "text-orange-400 bg-orange-950 border border-orange-800", barColor: "bg-orange-400", barWidth: "w-3/5" },
+    high: { badge: "text-red-400 bg-red-950 border border-red-800", barColor: "bg-red-400", barWidth: "w-5/6" },
+};
+
+// ─── SCORE RING ───────────────────────────────────────────────────────────────
 function ScoreRing({ score }) {
-  const r = 48;
-  const circ = 2 * Math.PI * r;
-  const [offset, setOffset] = useState(circ);
+    const r = 50;
+    const circumference = 2 * Math.PI * r;
+    const [offset, setOffset] = useState(circumference);
 
-  useEffect(() => {
-    const t = setTimeout(() => setOffset(circ - (score / 100) * circ), 400);
-    return () => clearTimeout(t);
-  }, [score, circ]);
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setOffset(circumference - (score / 100) * circumference);
+        }, 300);
+        return () => clearTimeout(t);
+    }, [score, circumference]);
 
-  const color = score >= 75 ? "#0e9f6e" : score >= 50 ? "#e3a008" : "#e02424";
-  const label = score >= 75 ? "Good Fit" : score >= 50 ? "Moderate Fit" : "Needs Work";
-  const labelBg = score >= 75 ? "#f0fdf4" : score >= 50 ? "#fffbeb" : "#fef2f2";
-  const labelBorder = score >= 75 ? "#bbf7d0" : score >= 50 ? "#fde68a" : "#fecaca";
+    const label = score >= 90 ? "Excellent Fit" : score >= 75 ? "Good Fit" : "Needs Work";
 
-  return (
-    <div className="flex flex-col items-center gap-2.5">
-      <div className="relative w-[120px] h-[120px]">
-        <svg style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }} viewBox="0 0 112 112">
-          <circle cx="56" cy="56" r={r} fill="none" stroke="var(--surface-3)" strokeWidth="7" />
-          <circle
-            cx="56" cy="56" r={r}
-            fill="none"
-            stroke={color}
-            strokeWidth="7"
-            strokeLinecap="round"
-            strokeDasharray={circ}
-            strokeDashoffset={offset}
-            style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)", filter: `drop-shadow(0 0 4px ${color}60)` }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span style={{ color }} className="text-[26px] font-extrabold leading-none">{score}</span>
-          <span className="text-[11px] text-[var(--text-muted)]">/ 100</span>
-        </div>
-      </div>
-      <span
-        style={{ color, background: labelBg, border: `1px solid ${labelBorder}` }}
-        className="text-[12px] font-bold px-3 py-[3px] rounded-[20px]"
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function QuestionCard({ index, question, intention, answer, prefix, color }) {
-  const [open, setOpen] = useState(false);
-  const colors = {
-    green: { bg: "#f0fdf4", text: "#0e9f6e", border: "#bbf7d0" },
-    blue:  { bg: "#eff6ff", text: "#1a56db", border: "#bfdbfe" },
-  };
-  const c = colors[color] || colors.blue;
-
-  return (
-    <div
-      style={{ border: `1px solid ${open ? c.border : "var(--border)"}` }}
-      className="bg-[var(--surface)] rounded-[10px] mb-2.5 overflow-hidden transition-[border-color] duration-200 shadow-[var(--shadow-sm)]"
-    >
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-start gap-3 px-[18px] py-3.5 bg-transparent border-none cursor-pointer text-left transition-[background] duration-150 hover:bg-[var(--surface-2)]"
-      >
-        <span
-          style={{ background: c.bg, color: c.text, border: `1px solid ${c.border}` }}
-          className="text-[10px] font-bold px-2 py-[2px] rounded-[6px] tracking-[0.05em] whitespace-nowrap mt-[1px]"
-        >
-          {prefix} {String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="flex-1 text-[14px] font-medium text-[var(--text-primary)] leading-[1.55]">
-          {question}
-        </span>
-        <svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none"
-          className="shrink-0 mt-[2px] text-[var(--text-muted)] transition-transform duration-200"
-          style={{ transform: open ? "rotate(180deg)" : "none" }}
-        >
-          <path d="M19 9l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-
-      <div
-        className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
-        style={{ maxHeight: open ? 600 : 0 }}
-      >
-        <div className="border-t border-[var(--border)] p-[16px_18px] flex flex-col gap-3.5 bg-[var(--surface-2)]">
-          {[
-            { label: "Intention", content: intention },
-            { label: "How to Answer", content: answer },
-          ].map(({ label, content }) => (
-            <div key={label} className="flex gap-3">
-              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.05em] min-w-[80px] pt-[2px]">
-                {label}
-              </span>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-[1.65] flex-1">{content}</p>
+    return (
+        <div className="flex flex-col items-center gap-3">
+            <div className="relative w-32 h-32">
+                <svg className="-rotate-90 w-full h-full" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r={r} fill="none" stroke="#1e293b" strokeWidth="8" />
+                    <circle
+                        cx="60" cy="60" r={r}
+                        fill="none"
+                        stroke="#34d399"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={offset}
+                        style={{
+                            transition: "stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)",
+                            filter: "drop-shadow(0 0 6px #34d399)",
+                        }}
+                    />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-black text-emerald-400 leading-none">{score}</span>
+                    <span className="text-xs text-slate-500 font-medium">/ 100</span>
+                </div>
             </div>
-          ))}
+            <p className="text-sm font-bold text-emerald-400 tracking-wide">{label}</p>
+            <p className="text-xs text-slate-500 text-center leading-relaxed font-light">
+                Candidate aligns strongly with the role requirements.
+            </p>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
-function SkillGap({ skill, severity }) {
-  const s = SEVERITY[severity] || SEVERITY.medium;
-  return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[13px] font-medium text-[var(--text-primary)]">{skill}</span>
-        <span
-          style={{ background: s.bg, color: s.text, border: `1px solid ${s.border}` }}
-          className="text-[10px] font-bold px-2 py-[2px] rounded-[20px] tracking-[0.04em] uppercase"
-        >
-          {s.label}
-        </span>
-      </div>
-      <div className="h-[5px] bg-[var(--surface-3)] rounded-[10px] overflow-hidden">
+// ─── SKILL GAP ITEM ───────────────────────────────────────────────────────────
+function SkillGapItem({ skill, sub, severity }) {
+    const cfg = SEVERITY_CONFIG[severity] || SEVERITY_CONFIG.medium;
+    return (
+        <div className="mb-4">
+            <div className="flex items-start justify-between gap-2 mb-2">
+                <div>
+                    <p className="text-sm font-medium text-slate-200 leading-snug">{skill}</p>
+                    {sub && <p className="text-xs text-slate-500">{sub}</p>}
+                </div>
+                <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.badge}`}>
+                    {severity}
+                </span>
+            </div>
+            <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-1000 ${cfg.barColor} ${cfg.barWidth}`} />
+            </div>
+        </div>
+    );
+}
+
+// ─── QUESTION ACCORDION CARD ─────────────────────────────────────────────────
+function QuestionCard({ index, question, intention, answer, prefix, accentClass, openBorderClass }) {
+    const [open, setOpen] = useState(false);
+
+    const chevronColor = accentClass.includes("emerald")
+        ? "text-emerald-400"
+        : "text-sky-400";
+
+    return (
         <div
-          style={{ width: s.width, background: s.bar, transition: "width 1s cubic-bezier(0.22,1,0.36,1)" }}
-          className="h-full rounded-[10px]"
-        />
-      </div>
-    </div>
-  );
-}
-
-function DayCard({ day, focus, tasks }) {
-  return (
-    <div className="flex gap-4 mb-4">
-      <div className="flex flex-col items-center">
-        <div className="w-9 h-9 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-[12px] font-bold shrink-0">
-          {day}
-        </div>
-        <div className="w-px flex-1 bg-[var(--border)] mt-1.5" />
-      </div>
-      <div className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-[10px] p-[14px_16px] mb-1 shadow-[var(--shadow-sm)]">
-        <p className="text-[14px] font-semibold text-[var(--text-primary)] mb-2.5">{focus}</p>
-        <ul className="list-none flex flex-col gap-[7px]">
-          {tasks.map((t, i) => (
-            <li key={i} className="flex gap-2 items-start">
-              <div className="w-[5px] h-[5px] rounded-full bg-[var(--primary)] mt-1.5 shrink-0" />
-              <span className="text-[13px] text-[var(--text-secondary)] leading-[1.55]">{t}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-export default function Interview() {
-  const [activeTab, setActiveTab] = useState("technical");
-  const { loading, report, getReportById, generateResume } = useInterview();
-  const { interviewId } = useParams();
-
-  useEffect(() => {
-    if (interviewId) getReportById(interviewId);
-  }, [interviewId]);
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--surface-2)]">
-      <div className="text-center">
-        <Spinner size={36} />
-        <p className="mt-3.5 text-[14px] text-[var(--text-muted)]">Loading your report...</p>
-      </div>
-    </div>
-  );
-
-  if (!report) return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--surface-2)]">
-      <div className="text-center">
-        <div className="text-[40px] mb-4">🔍</div>
-        <p className="text-[16px] font-semibold text-[var(--text-primary)] mb-2">Report not found</p>
-        <Link to="/" className="text-[var(--primary)] no-underline text-[14px]">← Back to Dashboard</Link>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-[var(--surface-2)] flex flex-col">
-
-      {/* Header */}
-      <header className="bg-[var(--surface)] border-b border-[var(--border)] px-6 h-14 flex items-center gap-4 sticky top-0 z-40 shadow-[var(--shadow-sm)]">
-        <Link
-          to="/"
-          className="flex items-center gap-1.5 text-[13px] text-[var(--text-secondary)] no-underline px-2.5 py-[5px] rounded-[6px] border border-[var(--border)] transition-all duration-150 hover:border-[var(--border-strong)]"
+            className={`bg-slate-900 rounded-2xl mb-3 overflow-hidden border transition-colors duration-200 
+        ${open ? openBorderClass : "border-slate-800"}`}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Dashboard
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <div className="w-[7px] h-[7px] rounded-full bg-[var(--success)]" />
-          <span className="text-[14px] font-semibold text-[var(--text-primary)]">
-            {report.title || "Interview Report"}
-          </span>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2.5">
-          <span className="text-[11px] text-[var(--text-muted)] bg-[var(--surface-3)] px-2.5 py-[3px] rounded-[20px] border border-[var(--border)]">
-            AI Generated
-          </span>
-
-          <button
-            onClick={() => generateResume(interviewId)}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3.5 py-[7px] bg-[var(--primary)] text-white border-none rounded-lg text-[13px] font-semibold"
-            style={{ cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? <Spinner size={13} color="white" /> : (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                <path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-            {loading ? "Generating..." : "Download Resume"}
-          </button>
-        </div>
-      </header>
-
-      {/* Body */}
-      <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
-
-        {/* Left sidebar */}
-        <nav className="w-[220px] shrink-0 bg-[var(--surface)] border-r border-[var(--border)] p-[16px_12px] flex flex-col gap-1 overflow-y-auto">
-          <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.08em] uppercase px-2 mb-2">
-            Sections
-          </p>
-          {TABS.map(tab => (
+            {/* Question trigger */}
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2.5 px-3 py-[9px] rounded-lg text-[13px] text-left transition-all duration-150 w-full cursor-pointer"
-              style={{
-                border: activeTab === tab.id ? "1px solid var(--border)" : "1px solid transparent",
-                background: activeTab === tab.id ? "var(--primary-light)" : "none",
-                color: activeTab === tab.id ? "var(--primary)" : "var(--text-secondary)",
-                fontWeight: activeTab === tab.id ? 600 : 400,
-              }}
+                onClick={() => setOpen((o) => !o)}
+                className="w-full flex items-start gap-3 px-5 py-4 text-left hover:bg-slate-800/40 transition-colors duration-150"
             >
-              <span className="text-[15px]">{tab.icon}</span>
-              {tab.label}
+                <span className={`text-[11px] font-bold tracking-wider px-2 py-0.5 rounded-md shrink-0 mt-0.5 border ${accentClass}`}>
+                    {prefix} {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="text-sm font-medium text-slate-100 leading-relaxed flex-1">{question}</span>
+                <span
+                    className={`text-lg shrink-0 mt-0.5 transition-transform duration-300 ${chevronColor}`}
+                    style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+                >
+                    ⌄
+                </span>
             </button>
-          ))}
-        </nav>
 
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-7 bg-[var(--surface-2)]">
-          {activeTab === "technical" && (
-            <div className="animate-fade-in">
-              <h2 className="text-[20px] font-bold text-[var(--text-primary)] mb-1.5 tracking-[-0.3px]">Technical Questions</h2>
-              <p className="text-[13px] text-[var(--text-muted)] mb-5">Click any question to reveal the interviewer's intention and a suggested answer.</p>
-              {report.technicalQuestions?.map((q, i) => (
-                <QuestionCard key={i} index={i} question={q.question} intention={q.intention} answer={q.answer} prefix="Q" color="green" />
-              ))}
+            {/* Collapsible detail */}
+            <div
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+                style={{ maxHeight: open ? "500px" : "0px" }}
+            >
+                <div className="border-t border-slate-800 px-5 py-4 flex flex-col gap-3">
+                    <div className="flex gap-3 items-start">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 w-20 shrink-0 pt-0.5">
+                            Intention
+                        </span>
+                        <p className="text-xs text-slate-400 leading-relaxed italic font-light">{intention}</p>
+                    </div>
+                    <div className="flex gap-3 items-start">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 w-20 shrink-0 pt-0.5">
+                            Answer
+                        </span>
+                        <p className="text-xs text-slate-400 leading-relaxed font-light">{answer}</p>
+                    </div>
+                </div>
             </div>
-          )}
+        </div>
+    );
+}
 
-          {activeTab === "behavioral" && (
-            <div className="animate-fade-in">
-              <h2 className="text-[20px] font-bold text-[var(--text-primary)] mb-1.5 tracking-[-0.3px]">Behavioral Questions</h2>
-              <p className="text-[13px] text-[var(--text-muted)] mb-5">Click any question to reveal the interviewer's intention and a suggested answer.</p>
-              {report.behavioralQuestions?.map((q, i) => (
-                <QuestionCard key={i} index={i} question={q.question} intention={q.intention} answer={q.answer} prefix="B" color="blue" />
-              ))}
+// ─── DAY CARD (ROADMAP) ───────────────────────────────────────────────────────
+function DayCard({ day, focus, tasks }) {
+    return (
+        <div className="relative pl-7 mb-5">
+            {/* Dot on timeline */}
+            <div
+                className="absolute left-0 top-4.5 w-3 h-3 rounded-full border-2 border-slate-950 bg-pink-500"
+                style={{ boxShadow: "0 0 8px #ec4899" }}
+            />
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 hover:border-pink-900 transition-colors duration-200">
+                <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-pink-400 bg-pink-950 border border-pink-900 px-2.5 py-0.5 rounded-md">
+                        Day {day}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-100">{focus}</span>
+                </div>
+                <ul className="flex flex-col gap-2">
+                    {tasks.map((task, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-pink-500 opacity-60 mt-1.5 shrink-0" />
+                            <p className="text-xs text-slate-400 leading-relaxed font-light">{task}</p>
+                        </li>
+                    ))}
+                </ul>
             </div>
-          )}
+        </div>
+    );
+}
 
-          {activeTab === "roadmap" && (
-            <div className="animate-fade-in">
-              <h2 className="text-[20px] font-bold text-[var(--text-primary)] mb-1.5 tracking-[-0.3px]">Preparation Roadmap</h2>
-              <p className="text-[13px] text-[var(--text-muted)] mb-6">
-                A {report.preparationPlan?.length}-day structured plan to get you interview-ready.
-              </p>
-              {report.preparationPlan?.map((day, i) => (
-                <DayCard key={i} day={day.day} focus={day.focus} tasks={day.tasks} />
-              ))}
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// ┌─ HOW TO INTEGRATE BACKEND ──────────────────────────────────────────────┐
+// │  Option 1 — fetch inside a parent page and pass as prop:               │
+// │    const [data, setData] = useState(null);                              │
+// │    useEffect(() => {                                                     │
+// │      fetch(`/api/interview-report/${id}`)                               │
+// │        .then(r => r.json()).then(setData);                             │
+// │    }, [id]);                                                             │
+// │    return <InterviewReport report={data} loading={!data} />;           │
+// │                                                                          │
+// │  Option 2 — fetch inside this component directly:                       │
+// │    Add your own useEffect + useState here at the top, then             │
+// │    remove the propReport fallback to MOCK_REPORT.                      │
+// └─────────────────────────────────────────────────────────────────────────┘
+export default function Interview() {
+    const [activeTab, setActiveTab] = useState("technical");
+    const { loading, report, getReportById, generateResume } = useInterview();
+
+    const { interviewId } = useParams();
+    // const report = propReport || MOCK_REPORT;
+
+    useEffect(() => {
+        if (interviewId) {
+            getReportById(interviewId);
+        }
+    }, [interviewId]);
+
+    // ── Loading state ──
+    // if (loading ) {
+    //     return (
+    //         <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+    //             <div className="flex flex-col items-center gap-3">
+    //                 <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+    //                 <p className="text-sm text-slate-500">Loading report...</p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+    if (!report) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+                <p className="text-sm text-slate-500">No report found.</p>
             </div>
-          )}
-        </main>
+        );
+    }
 
-        {/* Right panel */}
-        <aside className="w-[240px] shrink-0 bg-[var(--surface)] border-l border-[var(--border)] p-[20px_16px] overflow-y-auto">
-          <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.08em] uppercase mb-4">Match Score</p>
-          <div className="flex justify-center mb-6">
-            <ScoreRing score={report.matchScore} />
-          </div>
+    return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
 
-          <div className="h-px bg-[var(--border)] mb-5" />
+            {/* ── HEADER ── */}
+            <header className="flex items-center gap-3 px-7 py-3.5 bg-slate-900 border-b border-slate-800 shrink-0">
+                <div
+                    className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"
+                    style={{ boxShadow: "0 0 10px #34d399" }}
+                />
+                <h1 className="text-sm font-bold uppercase tracking-widest">
+                    <Link to="/">Interview Report</Link>
+                </h1>
+                <div className="ml-auto text-[11px] text-slate-500 border border-slate-700 px-3 py-1 rounded-full">
+                    AI Generated
+                </div>
+            </header>
 
-          <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-[0.08em] uppercase mb-4">Skill Gaps</p>
-          {report.skillGaps?.map((gap, i) => (
-            <SkillGap key={i} skill={gap.skill} severity={gap.severity} />
-          ))}
-        </aside>
-      </div>
-    </div>
-  );
+            {/* ── BODY (fills remaining viewport height) ── */}
+            <div className="flex flex-1 overflow-hidden">
+
+                {/* ── LEFT NAV ── */}
+                <nav className="w-58 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col gap-1.5 p-4">
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 px-2 pb-2.5 border-b border-slate-800 mb-1">
+                            Sections
+                        </p>
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left w-full transition-all duration-200
+                ${activeTab === tab.id
+                                        ? TAB_ACTIVE_STYLES[tab.id]
+                                        : "text-slate-500 hover:text-slate-300 hover:bg-slate-800 border border-transparent"
+                                    }`}
+                            >
+                                <span className="text-base leading-none">{tab.icon}</span>
+                                <span>{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => generateResume(interviewId)}
+                        className="flex items-center bg-blue-600 gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left w-full transition-all duration-200 text-slate-100 hover:text-white hover:bg-blue-500 border border-transparent"
+                    >
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Generating...
+                            </span>
+                        ) : "Generate Resume"}
+                    </button>
+                </nav>
+
+                {/* ── CENTER ── */}
+                <main className="flex-1 overflow-y-auto px-8 py-7 bg-slate-950">
+
+                    {activeTab === "technical" && (
+                        <div>
+                            <h2 className="text-xl font-black text-slate-100 mb-1 tracking-tight">Technical Questions</h2>
+                            <p className="text-xs text-slate-500 font-light mb-6">
+                                Click a question to reveal the intention and expected answer.
+                            </p>
+                            {report?.technicalQuestions.map((q, i) => (
+                                <QuestionCard
+                                    key={i} index={i}
+                                    question={q.question} intention={q.intention} answer={q.answer}
+                                    prefix="Q"
+                                    accentClass="text-emerald-400 bg-emerald-950 border-emerald-800"
+                                    openBorderClass="border-emerald-800"
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {activeTab === "behavioral" && (
+                        <div>
+                            <h2 className="text-xl font-black text-slate-100 mb-1 tracking-tight">Behavioral Questions</h2>
+                            <p className="text-xs text-slate-500 font-light mb-6">
+                                Click a question to reveal the intention and expected answer.
+                            </p>
+                            {report?.behavioralQuestions.map((q, i) => (
+                                <QuestionCard
+                                    key={i} index={i}
+                                    question={q.question} intention={q.intention} answer={q.answer}
+                                    prefix="B"
+                                    accentClass="text-sky-400 bg-sky-950 border-sky-800"
+                                    openBorderClass="border-sky-800"
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {activeTab === "roadmap" && (
+                        <div>
+                            <h2 className="text-xl font-black text-slate-100 mb-1 tracking-tight">Preparation Roadmap</h2>
+                            <p className="text-xs text-slate-500 font-light mb-6">
+                                A {report?.preparationPlan.length}-day structured plan to maximize interview readiness.
+                            </p>
+                            <div className="relative ml-1">
+                                {/* Vertical timeline line */}
+                                <div className="absolute left-1.25 top-4 bottom-4 w-0.5 bg-linear-to-b from-pink-500 to-purple-800 rounded-full" />
+                                {report?.preparationPlan.map((day, i) => (
+                                    <DayCard key={i} day={day.day} focus={day.focus} tasks={day.tasks} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                </main>
+
+                {/* ── RIGHT PANEL ── */}
+                <aside className="w-56 shrink-0 bg-slate-900 border-l border-slate-800 flex flex-col gap-6 p-5 overflow-y-auto">
+
+                    {/* Match Score */}
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Match Score</p>
+                        <ScoreRing score={report?.matchScore} />
+                    </div>
+
+                    <div className="h-px bg-slate-800" />
+
+                    {/* Skill Gaps */}
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Skill Gaps</p>
+                        {report?.skillGaps.map((gap, i) => (
+                            <SkillGapItem key={i} skill={gap.skill} sub={gap.sub} severity={gap.severity} />
+                        ))}
+                    </div>
+
+                </aside>
+            </div>
+        </div>
+    );
 }
