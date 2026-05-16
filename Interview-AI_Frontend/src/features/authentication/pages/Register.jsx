@@ -47,7 +47,7 @@ const Register = () => {
               type="password" name="password" placeholder='Enter Your Password' />
     
               <p className='text-gray-300'>Already have an account ? <Link className='text-blue-400 mr-0' to={"/login"}>Login</Link></p>
-              <button className='bg-blue-600 px-4 py-2 rounded-lg cursor-pointer'>Login</button>
+              <button className='bg-blue-600 px-4 py-2 rounded-lg cursor-pointer'>Register</button>
             </form>
           </div>
         </main>
