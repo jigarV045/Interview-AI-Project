@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useInterview } from '../hooks/useInterview'
 import { useNavigate } from 'react-router'
 import Navbar from '../../authentication/components/Navbar'
+import toast from 'react-hot-toast'
 
 const Home = () => {
   const { loading, generateReport, reports, getAllReports } = useInterview()
@@ -12,20 +13,28 @@ const Home = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-      getAllReports()
+    getAllReports()
   }, [])
 
   const handleGenerateReport = async () => {
-    const resumeFile = resumeInputRef.current.files[0]
+    const resumeFile = resumeInputRef.current.files[0];
+    if (!jobDescription || !resumeFile) {
+      toast.error("Please provide both a job description and a resume file to generate the report.");
+      return;
+    }
+
     const data = await generateReport({ jobDescription, resumeFile, selfDescription })
-    if (!data) return
+    if (!data) {
+      toast.error("The free AI engine is currently busy or rate-limited. Please wait 60 seconds and try again.");
+      return;
+    }
     navigate(`/interview/${data._id}`)
   }
 
   return (
     <main className="min-h-screen w-full bg-[#0f111a] text-gray-200 p-4 sm:p-6 md:p-8">
-        <Navbar />
-      <div className="mx-auto w-full max-w-5xl">       
+      <Navbar />
+      <div className="mx-auto w-full max-w-5xl">
 
         {/* Introduction Header */}
         <div className="mt-10 max-w-2xl">
@@ -36,13 +45,30 @@ const Home = () => {
             Fill in the details below. The system will look over the target role alongside your background to outline your core path, potential skill gaps, and custom practice questions.
           </p>
         </div>
+        {/* System Context Notice */}
+        <div className="mt-6 flex items-start gap-3 rounded-lg bg-indigo-950/20 border border-indigo-900/40 p-4 text-xs text-indigo-300/90 leading-relaxed max-w-5xl">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-indigo-400">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+          <div className="space-y-1">
+            <span className="font-semibold text-white block">System Context Notice</span>
+            <p>
+              This workspace utilizes a free preview model tier. To ensure a smooth structural analysis, please make sure your text entries are concise and your resume is a flat PDF file under 5 MB.
+            </p>
+            <p className="text-indigo-400/70 mt-1">
+              * Heavy global traffic may cause occasional rate-limit responses. If your generation gets blocked or fails to load, waiting 60 seconds before resubmitting generally clears the system block.
+            </p>
+          </div>
+        </div>
+
 
         {/* Main Interface Block */}
         <section className="mt-8 w-full rounded-xl border border-gray-800 bg-[#161925] shadow-xl overflow-hidden">
-          
+
           {/* Main Content Area using Flexbox row/column configuration */}
           <div className="flex flex-col lg:flex-row border-b border-gray-800">
-            
+
             {/* Left Box: Job Description Field (Takes 50% width on desktop) */}
             <div className="w-full lg:w-1/2 p-5 sm:p-6 flex flex-col border-b lg:border-b-0 lg:border-r border-gray-800">
               <div className="flex items-center justify-between mb-2">
@@ -61,7 +87,7 @@ const Home = () => {
 
             {/* Right Box: Resume and Info Uploads (Takes 50% width on desktop) */}
             <div className="w-full lg:w-1/2 p-5 sm:p-6 flex flex-col gap-5">
-              
+
               {/* Document Dropzone */}
               <div className="flex flex-col">
                 <label htmlFor="resume" className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">

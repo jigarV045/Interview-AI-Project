@@ -47,8 +47,13 @@ export const generateResumePDF = async (interviewReportId) => {
         const response = await api.post(`/api/interview/resume-pdf/${interviewReportId}`, null, {
             responseType: "blob"
         });
+
+        if (response.data.type === "application/json" || response.status !== 200) {
+            throw new Error("Backend failed to compile PDF file structural elements.");
+        }
         return response.data;
     } catch (error) {
         console.error("Failed to generate resume PDF", error);
+        return null;
     }
 }

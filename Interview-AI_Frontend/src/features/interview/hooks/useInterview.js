@@ -74,6 +74,7 @@ export const useInterview = () => {
                 window.URL.revokeObjectURL(url);
                 return true;
             }
+            return false;
         } catch (error) {
             console.error("Failed to generate resume PDF", error);
         } finally {

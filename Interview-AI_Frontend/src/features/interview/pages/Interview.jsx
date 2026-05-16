@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useInterview } from "../hooks/useInterview";
 import { Link, useParams } from "react-router";
 import Navbar from "../../authentication/components/Navbar";
+import toast from "react-hot-toast";
 
 const TABS = [
     { id: "technical", label: "Technical", icon: "⚙️" },
@@ -152,6 +153,7 @@ export default function Interview() {
     const [activeTab, setActiveTab] = useState("technical");
     const { loading, report, getReportById, generateResume } = useInterview();
     const { interviewId } = useParams();
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         if (interviewId) {
@@ -189,6 +191,7 @@ export default function Interview() {
                 {/* ── LEFT UTILITY PANEL (Flips layout fluidly on mobile viewports) ── */}
                 <nav className="w-full lg:w-56 shrink-0 bg-[#161925] border-b lg:border-b-0 lg:border-r border-gray-800 flex p-3 sm:p-4">
                     <div className="flex flex-row lg:flex-col gap-1.5 w-full">
+                        {/* 1. Category Tabs Loop */}
                         {TABS.map((tab) => (
                             <button
                                 key={tab.id}
@@ -204,12 +207,34 @@ export default function Interview() {
                             </button>
                         ))}
 
+                        {/* 2. Export Button with Isolated Inline Loading and Error Messaging */}
                         <button
-                            onClick={() => generateResume(interviewId)}
-                            className="flex items-center justify-center lg:justify-start gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-transparent bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all w-full"
+                            disabled={isGenerating}
+                            onClick={async () => {
+                                setIsGenerating(true);
+                                // We call your hook's method and wait for its true/false return
+                                const success = await generateResume(interviewId);
+                                setIsGenerating(false);
+
+                                if (success) {
+                                    toast.success("Resume downloaded successfully!");
+                                } else {
+                                    toast.error("Failed to generate resume. Please try again.");
+                                }
+                            }}
+                            className="flex items-center justify-center lg:justify-start gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border border-transparent bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all w-full disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            <span>📄</span>
-                            <span className="hidden sm:inline">{loading ? "Building..." : "Export Resume"}</span>
+                            {isGenerating ? (
+                                <>
+                                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent group-hover:border-white" />
+                                    <span className="hidden sm:inline">Generating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>📄</span>
+                                    <span className="hidden sm:inline">Export Resume</span>
+                                </>
+                            )}
                         </button>
                     </div>
                 </nav>
