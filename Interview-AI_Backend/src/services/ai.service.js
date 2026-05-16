@@ -1,7 +1,8 @@
 const { GoogleGenAI } = require("@google/genai");
 const { z } = require("zod");
 const { zodToJsonSchema } = require("zod-to-json-schema");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -109,7 +110,7 @@ async function interviewReport({ jobDescription, resume, selfDescription }) {
   //     }
   // })
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -121,10 +122,14 @@ async function interviewReport({ jobDescription, resume, selfDescription }) {
 }
 
 async function generateResumePDFfromHTML(htmlContent) {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+  });
   const page = await browser.newPage();
   await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-
   const pdfBuffer = await page.pdf({ format: "A4" });
   await browser.close();
   return pdfBuffer;
@@ -180,7 +185,7 @@ Technical Requirements:
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     generateConfig: {
-      temprature: 0,
+      temperature: 0,
     },
     contents: prompt,
     config: {
